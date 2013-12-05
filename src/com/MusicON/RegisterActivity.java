@@ -9,40 +9,77 @@ import android.view.View.OnClickListener;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiInfo;
+import android.content.Context;
+import java.io.*;
+import android.widget.Toast;
+import android.content.Intent;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Administrator
- * Date: 12/2/13
- * Time: 12:33 AM
- * To change this template use File | Settings | File Templates.
- */
 public class RegisterActivity extends Activity {
-    public TextView register;
-    public EditText name;
-    public EditText age;
-    public EditText favsinger;
-    public EditText favband;
-    public Button registerbtn;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        addListenerOnButton();
+        setContentView(R.layout.register);
     }
 
-    public void addListenerOnButton() {
-
-        registerbtn = (Button) findViewById(R.id.registerButton);
-
-        registerbtn.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
+    public void saveUserDetails(View view) {
 
 
+        EditText userNameEditText = (EditText) findViewById(R.id.nameText);
+        String userNameText = userNameEditText.getText().toString();
+
+        EditText ageEditText = (EditText) findViewById(R.id.ageText);
+        String ageText = ageEditText.getText().toString();
+
+        EditText favSingerEditText = (EditText) findViewById(R.id.favSingerText);
+        String favSingerText = favSingerEditText.getText().toString();
+
+        EditText favBandEditText = (EditText) findViewById(R.id.musicBandText);
+        String favBandText = favBandEditText.getText().toString();
+
+//        String userDetails = userNameText + "\n" + ageText + "\n" + favSingerText + "\n" + favBandText + "\n";
+        String userDetails = userNameText + "\n" + ageText + "\n" + favSingerText + "\n" + favBandText + "\n" + getMac() + "\n";
+
+        String fileName = "musicon_user.txt";
+
+        try {
+            FileOutputStream fos = view.getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+            fos.write(userDetails.getBytes());
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        MainActivity.registered = true;
+
+        Toast.makeText(getApplicationContext(),
+                "File written", Toast.LENGTH_LONG).show();
+        setContentView(R.layout.datasaved);
+    }
+
+    public void returnHome(View view) {
+        setContentView(R.layout.main);
+    }
+
+    public String getMac() {
+        StringBuffer fileData = new StringBuffer(1000);
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("/sys/class/net/eth0/address"));
+            char[] buf = new char[1024];
+            int numRead = 0;
+            while ((numRead = reader.read(buf)) != -1) {
+                String readData = String.valueOf(buf, 0, numRead);
+                fileData.append(readData);
             }
-        });
+            reader.close();
+            return fileData.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_gravity="center|top">
+
+    <EditText
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:id="@+id/nameText"
+            android:layout_alignParentLeft="true" android:layout_marginLeft="37dp" android:layout_alignParentTop="true"
+            android:layout_marginTop="20dp" />
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Age"
+            android:id="@+id/ageText"
+            android:layout_alignLeft="@+id/nameText" android:layout_alignParentTop="true"
+            android:layout_marginTop="74dp" android:layout_alignRight="@+id/nameText"/>
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Favorite music band"
+            android:id="@+id/musicBandText"
+            android:layout_alignLeft="@+id/nameText" android:layout_alignParentTop="true"
+            android:layout_marginTop="132dp" android:layout_alignRight="@+id/nameText"/>
+    <EditText android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Favorite singer" android:id="@+id/favSingerText"
+              android:layout_alignLeft="@+id/nameText" android:layout_alignParentTop="true"
+              android:layout_marginTop="185dp" android:layout_alignRight="@+id/nameText"/>
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Save"
+            android:id="@+id/saveButton"
+            android:onClick="saveUserDetails" android:layout_alignParentLeft="true" android:layout_marginLeft="95dp"
+            android:layout_alignParentTop="true" android:layout_marginTop="250dp" />
+
+</RelativeLayout>
