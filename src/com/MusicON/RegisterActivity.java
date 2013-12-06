@@ -39,7 +39,6 @@ public class RegisterActivity extends Activity {
         EditText favBandEditText = (EditText) findViewById(R.id.musicBandText);
         String favBandText = favBandEditText.getText().toString();
 
-//        String userDetails = userNameText + "\n" + ageText + "\n" + favSingerText + "\n" + favBandText + "\n";
         String userDetails = userNameText + "\n" + ageText + "\n" + favSingerText + "\n" + favBandText + "\n" + getMac() + "\n";
 
         String fileName = "musicon_user.txt";
@@ -55,7 +54,7 @@ public class RegisterActivity extends Activity {
         MainActivity.registered = true;
 
         Toast.makeText(getApplicationContext(),
-                "File written", Toast.LENGTH_LONG).show();
+                "File written. \nMAC address: " + getMac() + "\n", Toast.LENGTH_LONG).show();
         setContentView(R.layout.datasaved);
     }
 
@@ -64,22 +63,11 @@ public class RegisterActivity extends Activity {
     }
 
     public String getMac() {
-        StringBuffer fileData = new StringBuffer(1000);
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("/sys/class/net/eth0/address"));
-            char[] buf = new char[1024];
-            int numRead = 0;
-            while ((numRead = reader.read(buf)) != -1) {
-                String readData = String.valueOf(buf, 0, numRead);
-                fileData.append(readData);
-            }
-            reader.close();
-            return fileData.toString();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        String macAddr;
+        WifiManager wifiMan = (WifiManager) this.getSystemService(
+                Context.WIFI_SERVICE);
+        WifiInfo wifiInf = wifiMan.getConnectionInfo();
+        macAddr = wifiInf.getMacAddress();
+        return macAddr;
     }
 }
