@@ -1,1 +1,20 @@
 This file was created by IntelliJ IDEA 12.1.6 for binding GitHub repository
+
+
+App creates a file with accelerometer reading.
+
+To see the created file in the android device after you dance :)
+Connect your mobile device.
+1. Run adb shell 
+   Start > Type adb shell > run
+2. run-as com.MusicON
+3. cd app_logfiles
+4. ls
+
+For retrieving/copying file from the mobile device you need to have ADB installed on the machine that comes with ASDK pakage.
+
+Run the following command in your command shell:
+adb shell run-as com.MusicON cat /data/data/com.MusicON/[filename].log > [local machine file path]
+
+Example
+adb shell run-as com.MusicON cat /data/data/com.MusicON/20131211_145747.log > C:\AccLogs\acc.log
