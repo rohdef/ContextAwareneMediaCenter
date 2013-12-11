@@ -9,7 +9,7 @@
             android:layout_height="wrap_content"
             android:text="Media Center Found!"
             android:textColor="#ff8c00"
-            android:id="@+id/serverFoundText" android:layout_alignParentLeft="true" android:layout_marginLeft="90dp"
+            android:id="@+id/serverFoundText" android:layout_alignParentLeft="true" android:layout_marginLeft="95dp"
             android:layout_alignParentTop="true" android:layout_marginTop="40dp"/>
     <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="First time? Register"
             android:id="@+id/registerButton"
