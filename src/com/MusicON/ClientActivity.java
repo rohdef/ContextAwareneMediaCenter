@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,12 +22,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ClientActivity extends Activity implements Runnable {
+public class ClientActivity extends Activity{
 
     public static final int DISCOVERY_PORT = 49155;
     public static final int VOTING_PORT = 50032;
-    public static final Logger logger = Logger.getLogger(ClientActivity.class.getName());
-    private List<String> songs;
+    private List<String> songs = new ArrayList<>();
     private InetAddress serverAddress;
 
     public ClientActivity(List<String> songs, InetAddress serverAddress) {
@@ -43,7 +44,10 @@ public class ClientActivity extends Activity implements Runnable {
         super.onCreate(bundle);
 
         // retrieve data and save in file
+        //This returns null -Stig
         String data = getIntent().getStringExtra("USER_PREF");
+        data = "DummyUserName";
+        Log.i(this.getClass().getName(), "DATA LENGTH: " + data.length());
         String fileName = "musicon_user.txt";
 
         try {
@@ -59,17 +63,18 @@ public class ClientActivity extends Activity implements Runnable {
         Toast.makeText(getApplicationContext(),
                 "File written. \nData: " + data + "\n", Toast.LENGTH_LONG).show();
 
-        List<String> s = new ArrayList<>();
-
         for (int i = 0; i < 12; i++) {
-            s.add("Generic pop song #" + i);
+            songs.add("Generic pop song #" + i);
         }
 
 //        Toast.makeText(getApplicationContext(),
 //                s.get(1).toString(), Toast.LENGTH_LONG).show();
 
-        List<Thread> threads = new ArrayList<>();
-       InetAddress server = doDiscovery();
+        DiscoveryTask discovery = new DiscoveryTask();
+        discovery.execute(null);
+        //This is not a bug on honeycomb or later, all asyncs execute on a single thread
+        VotingListenerTask voting = new VotingListenerTask();
+        voting.execute(null);
 //        for (int i = 0; i < 10; i++) {
 //            List<String> songs = new ArrayList<>();
 //            songs.add(s.get(i));
@@ -115,16 +120,16 @@ public class ClientActivity extends Activity implements Runnable {
         toast.show();
 
     }
-    public static InetAddress doDiscovery() {
+    public InetAddress doDiscovery() {
         InetAddress res = null;
         //Server sends empty packet, address can be read off from the DatagramPacket properties
         try {
             DatagramPacket packet = receiveEmptyBroadcast(DISCOVERY_PORT);
             res = packet.getAddress();
         } catch (SocketException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            Log.wtf(null, ex);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            Log.wtf(null, ex);
         } //Real thing needs proper error handling of course
         return res;
     }
@@ -132,17 +137,17 @@ public class ClientActivity extends Activity implements Runnable {
     /*
      * Listens for the voting broadcast
      */
-    public static void waitForVoting() {
+    public void waitForVoting() {
         try {
             receiveEmptyBroadcast(VOTING_PORT); //Get address from here if you're not using discovery
         } catch (SocketException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            Log.wtf(null, ex);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            Log.wtf(null, ex);
         }
     }
 
-    public static DatagramPacket receiveEmptyBroadcast(int port) throws SocketException, IOException {
+    public DatagramPacket receiveEmptyBroadcast(int port) throws SocketException, IOException {
         DatagramSocket socket = new DatagramSocket(null);
         InetSocketAddress address = new InetSocketAddress("0.0.0.0", port);
         socket.bind(address);
@@ -163,7 +168,7 @@ public class ClientActivity extends Activity implements Runnable {
         try {
             socket = new Socket(serverAddress, VOTING_PORT);
         } catch (IOException e) {
-            Logger.getLogger(ClientActivity.class.getName()).log(Level.SEVERE, null, e);
+            Log.wtf(null, e);
         }
 
         try {
@@ -173,26 +178,50 @@ public class ClientActivity extends Activity implements Runnable {
                 writer.newLine();
             }
         } catch (IOException e) {
-            Logger.getLogger(ClientActivity.class.getName()).log(Level.SEVERE, null, e);
+            Log.wtf(null, e);
         }
-    }
-
-    @Override
-    public void run() {
-        try {
-            DatagramSocket socket = new DatagramSocket();
-            throwVotes(serverAddress);
-        } catch (SocketException e) {
-            logger.log(Level.SEVERE, null, e);
-        }
-
-        Toast.makeText(getApplicationContext(),
-                "Threw vote.\n", Toast.LENGTH_LONG).show();
-        logger.log(Level.INFO, "Threw vote");
     }
 
     public void returnHome(View view) {
         setContentView(R.layout.main);
+    }
+
+    private class DiscoveryTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... v){
+            serverAddress = doDiscovery();
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute(){
+            Log.i(ClientActivity.this.getClass().getName(), "Beginning discovery");
+        }
+
+        @Override
+        protected void onPostExecute(Void v){
+            Log.i(ClientActivity.this.getClass().getName(), "Discovery received");
+        }
+    }
+
+    private class VotingListenerTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... v){
+            waitForVoting();
+            Log.i(ClientActivity.this.getClass().getName(), "Voting in progress");
+            throwVotes(serverAddress);
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute(){
+            Log.i(ClientActivity.this.getClass().getName(), "Listening for voting broadcast");
+        }
+
+        @Override
+        protected void onPostExecute(Void v){
+            Log.i(ClientActivity.this.getClass().getName(), "Voting complete");
+        }
     }
 
 }
